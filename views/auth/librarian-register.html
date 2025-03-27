@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Librarian Registration</title>
+    <link rel="stylesheet" href="/css/style.css"> <!-- Ensure correct path -->
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <a href="../index.html">Library System</a>
+        </div>
+                <!-- Dark Mode Toggle Switch -->
+                <label class="switch">
+                    <input type="checkbox" id="darkModeToggle">
+                    <span class="slider"></span>
+                </label>
+            </header>
+    </header>
+    <script src="/js/darkmode.js"></script>
+
+    <div class="container">
+        <h1>Librarian Registration</h1>
+        <form action="/librarian-register" method="POST">
+        <label>First Name</label>
+        <input placeholder="First name" type="text" name="first_name" required>
+
+        <label>Last Name</label>
+        <input placeholder="Last name" type="text" name="last_name" required>
+
+        <label>Employee ID</label>
+        <input placeholder="Employee ID" type="text" name="employee_id" required>
+
+        <label>Department</label>
+        <select name="qualification">
+            <option value="Library">Library</option>
+            <option value="Science">Science</option>
+            <option value="Engineering">Engineering</option>
+            <option value="Arts">Arts</option>
+        </select>
+
+        <label>Experience</label>
+        <input placeholder="experience" type="Number" name="experience" required>
+
+        <label>Email</label>
+        <input placeholder="Email" type="email" name="email" required>
+
+        <label>Password</label>
+        <input placeholder="Password" type="password" name="password" required>
+
+        <label>Re-enter Password</label>
+        <input placeholder="Re-enter Password" type="password" name="confirm_password" required>
+
+        <button type="submit">Register</button>
+        <p>Already have an account? <a href="./librarian-login.html">Login</a></p>
+    </form>
+
+
+    </div>
+</body>
+</html>

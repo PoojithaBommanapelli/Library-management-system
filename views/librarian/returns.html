@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Returns</title>
+    <link rel="stylesheet" href="/css/style.css"> <!-- Ensure correct path -->
+    <script src="/public/js/darkmode.js"></script>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <a href="../index.html">Library System</a>
+        </div>
+        <nav>
+            <a href="./dashboard.html">Dashboard</a>
+            <a href="./add-book.html">Add Book</a>
+            <a href="./returns.html">Book Returns</a>
+            <a href="./profile.html">Profile</a>
+            <a href="../auth/index.html">Logout</a>
+        </nav>
+        
+        <!-- Dark Mode Toggle Switch -->
+        <label class="switch">
+            <input type="checkbox" id="darkModeToggle">
+            <span class="slider"></span>
+        </label>
+    </header>
+
+    <h2>Books Pending Return</h2>
+    <input type="text" id="searchBookId" placeholder="Search by Book ID..." onkeyup="filterBooks()">
+    <script src="/js/darkmode.js"></script>
+    <table id="pendingReturnsTable">
+        <thead>
+            <tr>
+                <th>Student_hallticket</th>
+                <th>Title</th>
+                <th>Borrowed Date</th>
+                <th>Due Date</th>
+                <th>Fine Amount</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="pendingReturns"></tbody>
+    </table>
+    <script src="/js/darkmode.js"></script>
+    <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        try {
+            console.log("📢 Fetching pending returns...");
+    
+            const response = await fetch("/api/pending-returns");
+            const data = await response.json();
+    
+            console.log("📢 API Response:", data);
+    
+            if (!data.success || !data.transactions || data.transactions.length === 0) {
+                console.log("❌ No pending returns found");
+                document.getElementById("pendingReturns").innerHTML = "<tr><td colspan='6'>No books pending return</td></tr>";
+                return;
+            }
+    
+            const tableBody = document.getElementById("pendingReturns");
+            tableBody.innerHTML = ""; // Clear existing rows
+    
+            const today = new Date();
+    
+            data.transactions.forEach(transaction => {
+                const dueDate = new Date(transaction.due_date);
+                const borrowDate = new Date(transaction.borrow_date);
+    
+                // ✅ Convert to YYYY-MM-DD format (fix timezone issues)
+                const formattedBorrowDate = borrowDate.toISOString().split("T")[0];
+                const formattedDueDate = dueDate.toISOString().split("T")[0];
+    
+                // ✅ Calculate fine correctly
+                const daysLate = Math.max(0, Math.ceil((today - dueDate) / (1000 * 60 * 60 * 24)));
+                const fineAmount = daysLate * 2; // ₹2 per day fine
+    
+const row = document.createElement("tr");
+row.innerHTML = `
+    <td class="book-id">${transaction.student_hall_ticket}</td>
+    <td>${transaction.book_title}</td> 
+    <td>${formattedBorrowDate}</td>
+    <td>${formattedDueDate}</td>
+    <td>₹ ${fineAmount} /-</td>
+    <td>
+        <button onclick="returnBook(${transaction.transaction_id}, ${fineAmount})">Return</button>
+    </td>
+`;
+tableBody.appendChild(row);
+            });
+        } catch (error) {
+            console.error("❌ Error loading pending books:", error);
+            document.getElementById("pendingReturns").innerHTML = "<tr><td colspan='6'>Error loading data</td></tr>";
+        }
+    });
+    
+    // ✅ Function to filter table by Book ID
+    function filterBooks() {
+        const searchValue = document.getElementById("searchBookId").value.toLowerCase();
+        const rows = document.querySelectorAll("#pendingReturns tr");
+    
+        rows.forEach(row => {
+            const bookId = row.querySelector(".book-id").textContent.toLowerCase();
+            row.style.display = bookId.includes(searchValue) ? "" : "none";
+        });
+    }
+    
+    // ✅ Function to return book
+    async function returnBook(transactionId, fineAmount) {
+        console.log("📢 Returning book with ID:", transactionId, "Fine:", fineAmount);
+    
+        if (fineAmount > 0 && !confirm(`This book has a fine of ₹${fineAmount}. Do you want to proceed?`)) {
+            return;
+        }
+    
+        try {
+            const response = await fetch("/return-book", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ transaction_id: transactionId, fine: fineAmount })
+            });
+    
+            const data = await response.json();
+            console.log("🔍 Server Response:", data);
+    
+            if (!data.success) {
+                alert(`❌ Error: ${data.error}`);
+            } else {
+                alert("✅ Book returned successfully!");
+                location.reload();
+            }
+        } catch (error) {
+            console.error("❌ Error returning book:", error);
+            alert("Failed to return book. Please try again.");
+        }
+    }
+    </script>
+    
+    </table>
+</body>
+</html>

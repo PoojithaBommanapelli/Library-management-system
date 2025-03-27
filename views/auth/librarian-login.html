@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Librarian Login</title>
+    <link rel="stylesheet" href="/css/style.css"><!-- Ensure correct path -->
+    <script src="/js/darkmode.js"></script>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <a href="../index.html">Library System</a>
+        </div>
+                <!-- Dark Mode Toggle Switch -->
+                <label class="switch">
+                    <input type="checkbox" id="darkModeToggle">
+                    <span class="slider"></span>
+                </label>
+            </header>
+    </header>
+    <div class="container">
+    <h1>Librarian Login</h1>
+    <form action="/auth/librarian-login" method="POST">
+        <label>Email</label>
+        <input placeholder="Enter Email" type="email" name="email" required>
+
+        <label>Password</label>
+        <input placeholder="Enter Password" type="password" name="password" required>
+
+        <button type="submit">Login</button>
+    </form>
+
+    <p>Don't have an account? <a href="./librarian-register.html">Register</a></p>
+    </div>
+</body>
+</html>

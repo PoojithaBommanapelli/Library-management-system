@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results</title>
+    <link rel="stylesheet" href="/css/style.css"> <!-- Ensure correct path -->
+    <script src="/js/darkmode.js"></script>
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <a href="/">Library System</a>
+        </div>
+        <nav>
+            <a href="/student-dashboard.html">Dashboard</a>
+            <a href="/search-results.html">Search Books</a>
+            <a href="/borrowed-books.html">Borrowed Books</a>
+            <a href="/student-profile.html">Profile</a>
+            <a href="/auth/index.html">Logout</a>
+        </nav>
+        <label class="switch">
+            <input type="checkbox" id="darkModeToggle">
+            <span class="slider"></span>
+        </label>
+    </header>
+
+    <h1>Search for Books</h1>
+    <div class="search-container">
+    <form action="/search-results" method="GET">
+        <input type="text" name="q" placeholder="Search books..." required><br>
+        <button type="submit">Search</button>
+    </form>
+    </div>
+    <h3>Search Results:</h3>
+<!--am given CSE, now cse going to in name=q=CSE-->
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Genre</th>
+                <th>Available Copies</th>
+                <th>Shelf Location</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="book-results">
+            <!-- Search results will be inserted here -->
+        </tbody>
+    </table>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.querySelector("form");
+            form.addEventListener("submit", async function (event) {
+                event.preventDefault();
+                const searchInput = document.querySelector('input[name="q"]').value; //q=cse &  searchInput = q= CSE
+                if (!searchInput.trim()) {
+                    alert("Please enter a search query");
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/api/search?q=${encodeURIComponent(searchInput)}`); //searchInput = q= CSE = RESPONSE
+                    const data = await response.json();
+                    const resultsTable = document.getElementById("book-results");
+                    resultsTable.innerHTML = ""; // Clear previous results
+
+                    if (data.success && data.books.length > 0) {
+                        data.books.forEach(book => {  //taking the values from const books
+                            // below order its showing
+                            const row = `
+                                <tr>
+                                    <td>${book.title}</td>
+                                    <td>${book.author}</td>
+                                    <td>${book.genre || 'N/A'}</td>
+                                    <td>${book.available_copies}</td>
+                                    <td>${book.shelf_location || 'Unknown'}</td>
+                                    <td>
+                                        ${book.available_copies > 0 ? 
+                                        `<button onclick="borrowBook(${book.id})">Borrow</button>` : 
+                                        `<span>Not Available</span>`}
+                                    </td>
+                                </tr>
+                            `;
+
+                            // by here wee need to borrow so i used javascript borrowBook(${book.id}
+                            resultsTable.innerHTML += row;
+                        });
+                    } else {
+                        resultsTable.innerHTML = "<tr><td colspan='6'>No results found</td></tr>";
+                    }
+                } catch (error) {
+                    console.error("Error fetching books:", error);
+                    alert("Failed to fetch books. Please try again.");
+                }
+            });
+        });
+
+            async function borrowBook(bookId) {
+                try {
+                    // Retrieve student ID and Hall Ticket from sessionStorage 
+                    const studentId = sessionStorage.getItem('student_id');
+                    const hallTicket = sessionStorage.getItem('hall_ticket');
+        
+                    if (!studentId || !hallTicket) {
+                        alert("You must be logged in to borrow a book.");
+                        return;
+                    }
+        
+                    // Send borrow request with student ID and Hall Ticket (or book ID)
+                    const response = await fetch('/api/borrow', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            student_id: studentId, // taking thos two books_id, students_id transfer to /api/borrow
+                            book_id: bookId
+                        })
+                    });
+        
+                    const data = await response.json();
+        
+                    if (data.success) {
+                        alert("Book borrowed successfully!");
+                        window.location.href = "/borrowed-books.html"; // Redirect to borrowed books page
+                    } else {
+                        alert("Failed to borrow book: " + data.error);
+                    }
+                } catch (error) {
+                    console.error("Error borrowing book:", error);
+                    alert("Failed to borrow book.");
+                }
+            }
+        
+    </script>
+    
+</body>
+</html>

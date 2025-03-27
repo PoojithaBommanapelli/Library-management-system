@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Book</title>
+    <link rel="stylesheet" href="/css/style.css"> <!-- Ensure correct path -->
+    <script src="/public/js/darkmode.js"></script>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <a href="../index.html">Library System</a>
+        </div>
+        <nav>
+            <a href="./dashboard.html">Dashboard</a>
+            <a href="./add-book.html">Add Book</a>
+            <a href="./returns.html">Book Returns</a>
+            <a href="./profile.html">Profile</a>
+            <a href="../auth/index.html">Logout</a>
+        </nav>
+        <!-- Dark Mode Toggle Switch -->
+        <label class="switch">
+            <input type="checkbox" id="darkModeToggle">
+            <span class="slider"></span>
+        </label>
+    </header>
+    <h1>Add Books in Library</h1>
+    <script src="/js/darkmode.js"></script>
+
+    <form id="add-book-form">
+        <input type="text" id="title" placeholder="Book Title" required>
+        <input type="text" id="author" placeholder="Author" required>
+        <input type="text" id="genre" placeholder="Genre" required>
+        <input type="number" id="year" placeholder="Publication Year" required>
+        <input type="number" id="copies" placeholder="Number of Copies" required>
+        <input type="text" id="shelf" placeholder="Shelf Location (e.g., A3, B5)" required>
+        <button type="submit">Add Book</button>
+    </form>
+
+    <script>
+        document.getElementById("add-book-form").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            const bookData = {
+                title: document.getElementById("title").value,
+                author: document.getElementById("author").value,
+                genre: document.getElementById("genre").value,
+                publication_year: document.getElementById("year").value,
+                available_copies: document.getElementById("copies").value,
+                shelf_location: document.getElementById("shelf").value
+            };
+
+            fetch("/librarian/add-book", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(bookData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                window.location.href = "/librarian/dashboard.html";
+            })
+            .catch(error => console.error("Error adding book:", error));
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Login</title>
+    <link rel="stylesheet" href="/css/style.css"> <!-- Ensure correct path -->
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <a href="../index.html">Library System</a>
+        </div>
+                <!-- Dark Mode Toggle Switch -->
+                <label class="switch">
+                    <input type="checkbox" id="darkModeToggle">
+                    <span class="slider"></span>
+                </label>
+            </header>
+    </header>
+    <script src="/js/darkmode.js"></script>
+
+    <div class="container">
+    <h1>Student Login</h1>
+
+    <form id="login-form">
+        <label>Email</label>
+        <input placeholder="Enter Email" type="email" name="email" id="email" required>
+
+        <label>Password</label>
+        <input placeholder="Enter Password" type="password" name="password" id="password" required>
+
+        <button type="submit">Login</button>
+    </form>
+
+    <p>Don't have an account? <a href="./student-register.html">Register</a></p>
+    </div>
+    <script>
+        // Capture form submit event
+        document.getElementById('login-form').addEventListener('submit', async function (event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch('/student-login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Store student info in sessionStorage or localStorage
+                    sessionStorage.setItem('student_id', data.studentId);
+                    sessionStorage.setItem('hall_ticket', data.hall_ticket);
+
+                    // Redirect to the student dashboard or profile page
+                    window.location.href = "/student-profile.html";  // Redirect to a page after successful login
+                } else {
+                    alert('Login failed: ' + data.message);  // Display error message
+                }
+            } catch (error) {
+                console.error("Error logging in:", error);
+                alert('Login failed due to an error. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Borrowed Books</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/darkmode.js"></script>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <a href="student-dashboard.html">Library System</a>
+        </div>
+        <nav>
+            <a href="student-dashboard.html">Dashboard</a>
+            <a href="search-results.html">Search Books</a>
+            <a href="borrowed-books.html">Borrowed Books</a>
+            <a href="student-profile.html">Profile</a>
+            <a href="../auth/index.html">Logout</a>
+        </nav>
+        <label class="switch">
+            <input type="checkbox" id="darkModeToggle">
+            <span class="slider"></span>
+        </label>
+    </header>
+
+    <h1>My Borrowed Books</h1>
+
+    <!-- ✅ Search Input -->
+    <input type="text" id="searchInput" placeholder="Search by Title, Author, or Date..." onkeyup="filterBooks()">
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Issued Date</th>
+                <th>Due Date</th>
+                <th>Fine (₹)</th>
+            </tr>
+        </thead>
+        <tbody id="borrowed-books">
+            <!-- Borrowed books will be inserted here -->
+        </tbody>
+    </table>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", async function () {
+        await fetchStudentBorrowedBooks();
+    });
+
+    async function fetchStudentBorrowedBooks() {
+        try {
+            // ✅ Get student_id from sessionStorage
+            const student_id = sessionStorage.getItem("student_id");
+
+            if (!student_id) {
+                console.error("❌ Student ID is missing!");
+                alert("You must be logged in to view borrowed books.");
+                return;
+            }
+
+            // ✅ Fetch borrowed books with student_id
+            const response = await fetch(`/api/borrowed-books?student_id=${student_id}`); // which is sending student id = 4 to  api/borrowed-books
+            const data = await response.json();
+
+            const table = document.getElementById("borrowed-books");
+            table.innerHTML = "";
+
+            if (data.success && data.books.length > 0) {
+                const currentDate = new Date();
+
+                data.books.forEach(book => {
+                    const issueDate = new Date(book.borrow_date).toISOString().split("T")[0];
+                    const dueDate = new Date(book.due_date).toISOString().split("T")[0];
+
+                    // ✅ Fine calculation (₹5 per day late)
+                    const daysLate = Math.max(0, Math.floor((currentDate - new Date(book.due_date)) / (1000 * 60 * 60 * 24)));
+                    const fine = daysLate * 5;
+
+                    table.innerHTML += `
+                        <tr class="searchable">
+                            <td>${book.title}</td>
+                            <td>${book.author}</td>
+                            <td>${issueDate}</td> 
+                            <td>${dueDate}</td>
+                            <td>₹${fine}</td>
+                        </tr>
+                    `;
+                });
+            } else {
+                table.innerHTML = "<tr><td colspan='5'>No borrowed books</td></tr>";
+            }
+        } catch (error) {
+            console.error("❌ Error fetching borrowed books:", error);
+            alert("Failed to load borrowed books.");
+        }
+    }
+
+    // ✅ Search Function (Filters by Title, Author, or Date)
+    function filterBooks() {
+        const searchValue = document.getElementById("searchInput").value.toLowerCase();
+        const rows = document.querySelectorAll("#borrowed-books tr");
+
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(searchValue) ? "" : "none";
+        });
+    }
+    </script>
+
+</body>
+</html>

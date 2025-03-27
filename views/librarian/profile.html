@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Librarian Profile</title>
+    <link rel="stylesheet" href="/css/style.css"> <!-- Ensure correct path -->
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <a href="../index.html">Library System</a>
+        </div>
+        <nav>
+            <a href="./dashboard.html">Dashboard</a>
+            <a href="./add-book.html">Add Book</a>
+            <a href="./returns.html">Book Returns</a>
+            <a href="./profile.html">Profile</a>
+            <a href="../auth/index.html">Logout</a>
+        </nav>
+        
+        <!-- Dark Mode Toggle Switch -->
+        <label class="switch">
+            <input type="checkbox" id="darkModeToggle">
+            <span class="slider"></span>
+        </label>
+    </header>
+
+    <h2>Librarian Profile</h2>
+
+    <div class="profile-container">
+        <p id="name">Name: Loading...</p>
+        <p id="employee_id">Employee ID: Loading...</p>
+        <p id="qualification">Qualification: Loading...</p>
+        <p id="experience">Experience: Loading...</p>
+        <p id="email">Email: Loading...</p>
+        <p id="error" style="color: red;"></p> <!-- Error display -->
+    </div>
+
+    <script>
+        async function fetchProfile() {
+            try {
+                console.log("📢 Fetching librarian profile...");
+                const response = await fetch("/api/profile");
+                const data = await response.json();
+
+                console.log("📢 API Response:", data);
+
+                if (response.ok && data.success) {
+                    document.getElementById("name").innerText = `Name: ${data.user.first_name || "N/A"} ${data.user.last_name || ""}`;
+                    document.getElementById("employee_id").innerText = `Employee ID: ${data.user.employee_id || "N/A"}`;
+                    document.getElementById("qualification").innerText = `Qualification: ${data.user.qualification || "N/A"}`;
+                    document.getElementById("experience").innerText = `Experience: ${data.user.experience || "N/A"} years`;
+                    document.getElementById("email").innerText = `Email: ${data.user.email || "N/A"}`;
+                } else {
+                    console.error("❌ Profile fetch error:", data.message);
+                    document.getElementById("error").innerText = `Error: ${data.message}`;
+                }
+            } catch (error) {
+                console.error("❌ Error fetching profile:", error);
+                document.getElementById("error").innerText = "Failed to load profile. Check console for details.";
+            }
+        }
+
+        fetchProfile();
+    </script>
+</body>
+</html>
